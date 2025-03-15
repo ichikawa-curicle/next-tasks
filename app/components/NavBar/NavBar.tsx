@@ -1,6 +1,6 @@
 import { auth } from "@/auth";
 import Link from "next/link";
-import SignoutForm from "./SignoutForm";
+import SignoutForm from "../../profile/components/SignoutForm";
 import UserAvator from "./UserAvatar";
 import Button from "@/app/components/Button";
 
@@ -19,7 +19,6 @@ export default async function NavBar() {
           session?.user ? (
             <>
               <UserAvator />
-              <SignoutForm />
             </>
           ) : (
             <>
