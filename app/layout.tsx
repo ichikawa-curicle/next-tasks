@@ -15,14 +15,10 @@ export default function DashboardLayout({
   return (
     <html lang="ja">
       <body className="bg-gray-200">
-        <div className="max-w-6xl mx-auto">
-          <NavBar />
-          <main className="
-            bg-red-200
-          ">
-            {children}
-          </main>
-        </div>
+        <NavBar />
+        <main className="bg-red-200">
+          {children}
+        </main>
       </body>
     </html>
   )

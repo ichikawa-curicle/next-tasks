@@ -13,7 +13,7 @@ export default async function NavBar() {
       border-b
       bg-blue-200
     ">
-      <Link href="/" className="text-4xl font-semibold bg-green-200">Tasks</Link>
+      <h1><Link href="/" className="text-4xl font-semibold bg-green-200">Tasks</Link></h1>
       <div className="flex space-x-3 bg-green-200">
         {
           session?.user ? (
