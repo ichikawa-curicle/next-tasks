@@ -1,11 +1,10 @@
 import NextAuth from "next-auth"
-// import { PrismaAdapter } from "@auth/prisma-adapter"
-// import { prisma } from "@/globals/db"
 import GitHub from "next-auth/providers/github"
 import Credentials from "next-auth/providers/credentials"
 import { signInSchema } from "@/app/lib/zod"
 import { getUserByEmail } from "@/app/lib/user"
 import bcrypt from "bcryptjs"
+import { prisma } from "@/app/lib/prisma"
 
 const providers = [
   Credentials({
@@ -14,8 +13,6 @@ const providers = [
       password: { label: "Password", type: "password" },
     },
     async authorize(credentials) {
-      // ここに認証ロジックを書く (認証失敗時は null を返す？)
-
       // 入力チェック
       const validatedFields = signInSchema.safeParse(credentials)
       if (!validatedFields.success) return null
@@ -24,7 +21,7 @@ const providers = [
       
       // ユーザー存在チェック
       const user = await getUserByEmail(email)
-      if (!user) return null
+      if (!user || !user.password) return null
 
       // パスワード一致チェック
       const match = await bcrypt.compare(password, user.password)
@@ -50,9 +47,44 @@ export const providerMap = providers
   .filter((provider) => provider.id !== "credentials")
 
 export const { handlers, signIn, signOut, auth } = NextAuth({
-  // adapter: PrismaAdapter(prisma),
   providers: providers,
   callbacks: {
+    async signIn({ user, account, profile }) {
+      if (account?.provider === "github" && user.email && profile?.id) {
+        try {
+          // 既存のユーザーを検索
+          const existingUser = await prisma.user.findUnique({
+            where: { email: user.email },
+          })
+
+          if (existingUser) {
+            // 既存ユーザーの場合、GitHub情報を更新
+            await prisma.user.update({
+              where: { id: existingUser.id },
+              data: {
+                githubId: String(profile.id),
+                name: user.name ?? existingUser.name,
+                image: user.image ?? existingUser.image,
+              },
+            })
+          } else {
+            // 新規ユーザーの場合、新しくレコードを作成
+            await prisma.user.create({
+              data: {
+                email: user.email,
+                name: user.name ?? null,
+                image: user.image ?? null,
+                githubId: String(profile.id),
+              },
+            })
+          }
+        } catch (error) {
+          console.error("GitHub認証時のDB処理でエラーが発生しました:", error)
+          return false
+        }
+      }
+      return true
+    },
     async authorized({ auth, request: { nextUrl: { pathname, origin } } }) {
       // ここに認可ロジックを書く
       // false: サインインページにリダイレクト, true: スルー, Response: リダイレクト
