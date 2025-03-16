@@ -1,6 +1,5 @@
 import { auth } from "@/auth";
 import Link from "next/link";
-import SignoutForm from "../../profile/components/SignoutForm";
 import UserAvator from "./UserAvatar";
 import Button from "@/app/components/Button";
 
