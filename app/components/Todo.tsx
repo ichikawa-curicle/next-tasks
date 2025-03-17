@@ -77,7 +77,7 @@ export default function Todo() {
             value={newTask}
             onChange={(e) => setNewTask(e.target.value)}
             placeholder="新しいタスクを入力..."
-            className="flex-grow p-2 border rounded-l-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+            className="flex-grow p-2 border rounded-l-lg focus:outline-none focus:ring-1 focus:ring-blue-400"
           />
           <button
             type="submit"
